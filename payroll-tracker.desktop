@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Payroll Tracker
+Exec=payroll-tracker
+Icon=payroll-tracker
+Type=Application
+Categories=Office;Finance;
+Comment=Professional Expense & Payroll Management
+Terminal=false
+StartupWMClass=PayrollTracker
