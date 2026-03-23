@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=Payroll Tracker
-Exec=payroll-tracker
+Name=KPayroll
+Exec=kpayroll
 Icon=payroll-tracker
 Type=Application
 Categories=Office;Finance;
-Comment=Professional Expense & Payroll Management
+Comment=Professional local-first payroll and expense tracker
 Terminal=false
-StartupWMClass=PayrollTracker
+StartupWMClass=KPayroll
