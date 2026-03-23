@@ -24,8 +24,8 @@ build() {
 package() {
   cd "$srcdir/payroll-tracker"
   
-  # Install binary (Tauri v2 release binary name defaults to 'app' if not configured otherwise in some environments)
-  install -Dm755 "src/payroll-tracker/src-tauri/target/release/app" "$pkgdir/usr/bin/payroll-tracker"
+  # Install binary
+  install -Dm755 "src-tauri/target/release/app" "$pkgdir/usr/bin/kpayroll"
   
   # Install desktop entry
   install -Dm644 "$srcdir/payroll-tracker.desktop" "$pkgdir/usr/share/applications/payroll-tracker.desktop"
