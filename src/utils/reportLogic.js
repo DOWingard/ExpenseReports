@@ -44,10 +44,10 @@ export const generateReport = (expenses, periodName, reportFrequency = 'monthly'
     const reportFactor = FREQUENCY_FACTORS[reportFrequency] || 12;
 
     const proRatedExpenses = expenses.map(e => {
-        if (!e.isRecurring) return { ...e, reportPrice: Number(e.price) };
+        if (!e.isRecurring) return { ...e, reportPrice: Math.round(Number(e.price) * 100) / 100 };
 
         const expenseFactor = FREQUENCY_FACTORS[e.frequency] || 12;
-        const reportPrice = (Number(e.price) * expenseFactor) / reportFactor;
+        const reportPrice = Math.round(((Number(e.price) * expenseFactor) / reportFactor) * 100) / 100;
 
         return {
             ...e,
@@ -59,8 +59,8 @@ export const generateReport = (expenses, periodName, reportFrequency = 'monthly'
     const oneTime = proRatedExpenses.filter(e => !e.isRecurring);
     const recurring = proRatedExpenses.filter(e => e.isRecurring);
 
-    const totalOneTime = oneTime.reduce((sum, e) => sum + e.reportPrice, 0);
-    const totalRecurring = recurring.reduce((sum, e) => sum + e.reportPrice, 0);
+    const totalOneTime = Math.round(oneTime.reduce((sum, e) => sum + e.reportPrice, 0) * 100) / 100;
+    const totalRecurring = Math.round(recurring.reduce((sum, e) => sum + e.reportPrice, 0) * 100) / 100;
 
     return {
         payPeriod: periodName,

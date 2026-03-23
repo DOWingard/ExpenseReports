@@ -6,8 +6,8 @@ pkgdesc="Professional local-first payroll and expense tracker"
 arch=('x86_64')
 url="https://github.com/DOWingard/ExpenseReports"
 license=('MIT')
-depends=('webkit2gtk' 'openssl' 'libappindicator-gtk3' 'librsvg')
-makedepends=('nodejs' 'npm' 'rust' 'cargo')
+depends=('webkit2gtk-4.1' 'openssl' 'libappindicator-gtk3' 'librsvg' 'libnm')
+makedepends=('nodejs' 'npm' 'rust' 'cargo' 'pkgconf')
 source=("payroll-tracker::git+https://github.com/DOWingard/ExpenseReports.git"
         "payroll-tracker.desktop")
 sha256sums=('SKIP'

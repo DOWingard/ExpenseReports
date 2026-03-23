@@ -12,7 +12,7 @@ export const checkAndAutoGenerateReport = async (settings, expenses, reports, ad
     const reportExists = reports.some(r => r.payPeriod === currentMonthYear);
 
     // If it's the report day and the report hasn't been generated yet
-    if (!reportExists && (today.getDate().toString() === reportDay || isSameDay(today, new Date()))) {
+    if (!reportExists && today.getDate().toString() === reportDay) {
         console.log(`Auto-generating report for ${currentMonthYear}`);
         const report = generateReport(expenses, currentMonthYear);
         await addReport(report);

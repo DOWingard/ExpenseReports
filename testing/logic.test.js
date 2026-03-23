@@ -63,6 +63,17 @@ describe('Payroll Logic Verification', () => {
         expect(annualReport.totalCost).toBe(6450);
     });
 
+    it('should handle floating point precision with rounding', () => {
+        const expenses = [
+            { name: 'Weekly Item', price: 100, isRecurring: true, frequency: 'weekly' }
+        ];
+
+        // (100 * 52 / 12) = 433.333... should be 433.33
+        const report = generateReport(expenses, 'Month View', 'monthly');
+        expect(report.totalRecurring).toBe(433.33);
+        expect(report.expenses[0].reportPrice).toBe(433.33);
+    });
+
     it('should handle empty expense lists', () => {
         const report = generateReport([], 'Empty');
         expect(report.totalCost).toBe(0);
