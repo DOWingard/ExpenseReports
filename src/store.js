@@ -1,37 +1,110 @@
 import { create } from 'zustand';
-import { db, getSettings, saveSettings, getExpenses, addExpense, deleteExpense, getReports } from './db';
+import {
+    db,
+    getAllOrganizations,
+    saveOrganization,
+    deleteOrganization,
+    getExpensesByOrg,
+    getReportsByOrg,
+    addExpense as dbAddExpense,
+    deleteExpense as dbDeleteExpense,
+    addReport as dbAddReport
+} from './db';
 
 const useStore = create((set, get) => ({
-    settings: null,
+    organizations: [],
+    activeOrgId: localStorage.getItem('activeOrgId') || null,
+    settings: null, // Current active org settings
     expenses: [],
     reports: [],
     isLoading: true,
 
     init: async () => {
-        const settings = await getSettings();
-        const expenses = await getExpenses();
-        const reports = await getReports();
-        set({ settings, expenses, reports, isLoading: false });
+        const orgs = await getAllOrganizations();
+        let activeId = get().activeOrgId;
+
+        // If activeOrgId is set but not in list, clear it
+        if (activeId && !orgs.find(o => o.id === activeId)) {
+            activeId = null;
+        }
+
+        set({ organizations: orgs, activeOrgId: activeId });
+
+        if (activeId) {
+            await get().loadOrgData(activeId);
+        } else {
+            set({ isLoading: false });
+        }
+    },
+
+    loadOrgData: async (orgId) => {
+        set({ isLoading: true });
+        const orgs = await getAllOrganizations();
+        const settings = orgs.find(o => o.id === orgId);
+        const expenses = await getExpensesByOrg(orgId);
+        const reports = await getReportsByOrg(orgId);
+
+        localStorage.setItem('activeOrgId', orgId);
+        set({
+            settings,
+            expenses,
+            reports,
+            activeOrgId: orgId,
+            isLoading: false
+        });
+    },
+
+    setActiveOrg: async (orgId) => {
+        if (!orgId) {
+            localStorage.removeItem('activeOrgId');
+            set({ activeOrgId: null, settings: null, expenses: [], reports: [] });
+            return;
+        }
+        await get().loadOrgData(orgId);
+    },
+
+    addOrganization: async (orgData) => {
+        await saveOrganization(orgData);
+        const orgs = await getAllOrganizations();
+        set({ organizations: orgs });
+        await get().loadOrgData(orgData.id);
+    },
+
+    removeOrganization: async (orgId) => {
+        await deleteOrganization(orgId);
+        const orgs = await getAllOrganizations();
+        const nextActiveId = get().activeOrgId === orgId ? null : get().activeOrgId;
+
+        set({ organizations: orgs });
+        if (!nextActiveId) {
+            await get().setActiveOrg(null);
+        }
     },
 
     updateSettings: async (newSettings) => {
-        await saveSettings(newSettings);
-        set({ settings: newSettings });
+        const orgId = get().activeOrgId;
+        const updated = { ...newSettings, id: orgId };
+        await saveOrganization(updated);
+        set({ settings: updated });
     },
 
     addExpense: async (expense) => {
-        const id = await addExpense(expense);
-        set((state) => ({ expenses: [...state.expenses, { ...expense, id }] }));
+        const orgId = get().activeOrgId;
+        const expenseWithOrg = { ...expense, orgId };
+        const id = await dbAddExpense(expenseWithOrg);
+        set((state) => ({ expenses: [...state.expenses, { ...expenseWithOrg, id }] }));
     },
 
     removeExpense: async (id) => {
-        await deleteExpense(id);
+        await dbDeleteExpense(id);
         set((state) => ({ expenses: state.expenses.filter(e => e.id !== id) }));
     },
 
     addReport: async (report) => {
-        const id = await db.reports.add(report);
-        set((state) => ({ reports: [...state.reports, { ...report, id }] }));
+        const orgId = get().activeOrgId;
+        const reportWithOrg = { ...report, orgId };
+        const id = await dbAddReport(reportWithOrg);
+        set((state) => ({ reports: [...state.reports, { ...reportWithOrg, id }] }));
     }
 }));
 

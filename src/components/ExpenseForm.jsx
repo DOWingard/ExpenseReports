@@ -102,7 +102,7 @@ const ExpenseForm = ({ onClose }) => {
                                 <option value="weekly">Weekly</option>
                                 <option value="bi-weekly">Bi-weekly</option>
                                 <option value="monthly">Monthly</option>
-                                <option value="annually">Annually</option>
+                                <option value="annual">Annual</option>
                             </select>
                         </div>
                         <div className="form-group">

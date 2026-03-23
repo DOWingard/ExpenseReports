@@ -1,36 +1,46 @@
 import React, { useState } from 'react';
 import useStore from '../store';
 
-const Setup = () => {
-    const { updateSettings } = useStore();
+import { generateId } from '../db';
+
+const Setup = ({ onCancel }) => {
+    const updateSettings = useStore(state => state.updateSettings);
+    const addOrganization = useStore(state => state.addOrganization);
+
     const [formData, setFormData] = useState({
+        id: generateId(),
         companyName: '',
         reportFrequency: 'monthly',
         reportDay: '1',
         startDate: new Date().toISOString().split('T')[0]
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        updateSettings(formData);
+        await addOrganization(formData);
+        if (onCancel) onCancel();
     };
 
     return (
         <div className="container" style={{ maxWidth: '600px', marginTop: '10vh' }}>
             <div className="card">
-                <h2 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>Initial Setup</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>Company Name</label>
-                        <input
-                            type="text"
-                            required
-                            value={formData.companyName}
-                            onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                            placeholder="e.g. Acme Corp"
-                        />
-                    </div>
+                <h1 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>Create Organization</h1>
+                <p style={{ color: '#666' }}>Set up a new company infrastructure.</p>
+            </div>
 
+            <form onSubmit={handleSubmit} className="card">
+                <div className="form-group">
+                    <label>Company Name</label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.companyName}
+                        onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                        placeholder="e.g. Acme Corp"
+                    />
+                </div>
+
+                <div className="grid">
                     <div className="form-group">
                         <label>Reporting Frequency</label>
                         <select
@@ -40,36 +50,41 @@ const Setup = () => {
                             <option value="weekly">Weekly</option>
                             <option value="bi-weekly">Bi-weekly</option>
                             <option value="monthly">Monthly</option>
-                            <option value="annually">Annually</option>
+                            <option value="annual">Annual</option>
                         </select>
                     </div>
-
                     <div className="form-group">
-                        <label>Day of Report (e.g. 1 for 1st of month, or Monday for weekly)</label>
+                        <label>Report Day (of month)</label>
                         <input
-                            type="text"
-                            required
+                            type="number"
+                            min="1"
+                            max="31"
                             value={formData.reportDay}
                             onChange={(e) => setFormData({ ...formData, reportDay: e.target.value })}
-                            placeholder="1"
                         />
                     </div>
+                </div>
 
-                    <div className="form-group">
-                        <label>Start From Date</label>
-                        <input
-                            type="date"
-                            required
-                            value={formData.startDate}
-                            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                        />
-                    </div>
+                <div className="form-group">
+                    <label>Accounting Start Date</label>
+                    <input
+                        type="date"
+                        value={formData.startDate}
+                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    />
+                </div>
 
-                    <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
-                        Start Managing Payroll
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    {onCancel && (
+                        <button type="button" className="btn btn-secondary" onClick={onCancel} style={{ flex: 1 }}>
+                            Cancel
+                        </button>
+                    )}
+                    <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
+                        Create Organization
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     );
 };

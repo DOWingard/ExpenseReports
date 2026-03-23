@@ -42,15 +42,22 @@ const ReportView = ({ report, onBack, companyName }) => {
                             ) : (
                                 recurring.map((e, idx) => (
                                     <tr key={idx}>
-                                        <td>{e.name}</td>
-                                        <td>{e.frequency}</td>
-                                        <td className="price">${Number(e.price).toLocaleString()}</td>
+                                        <td>
+                                            <div style={{ fontWeight: 500 }}>{e.name}</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                                Original: ${Number(e.originalPrice || e.price).toLocaleString()} / {e.frequency}
+                                            </div>
+                                        </td>
+                                        <td>{report.reportFrequency || 'monthly'}</td>
+                                        <td className="price" style={{ fontWeight: 600 }}>
+                                            ${Number(e.reportPrice || e.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </td>
                                     </tr>
                                 ))
                             )}
-                            <tr style={{ fontWeight: 'bold' }}>
-                                <td colSpan="2">Subtotal Recurring</td>
-                                <td className="price">${report.totalRecurring.toLocaleString()}</td>
+                            <tr style={{ fontWeight: 'bold', background: '#f8f9fa' }}>
+                                <td colSpan="2">Subtotal Recurring ({report.reportFrequency || 'monthly'})</td>
+                                <td className="price">${report.totalRecurring.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -78,9 +85,9 @@ const ReportView = ({ report, onBack, companyName }) => {
                                     </tr>
                                 ))
                             )}
-                            <tr style={{ fontWeight: 'bold' }}>
+                            <tr style={{ fontWeight: 'bold', background: '#f8f9fa' }}>
                                 <td colSpan="2">Subtotal One-Time</td>
-                                <td className="price">${report.totalOneTime.toLocaleString()}</td>
+                                <td className="price">${report.totalOneTime.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -91,13 +98,14 @@ const ReportView = ({ report, onBack, companyName }) => {
                     padding: '1.5rem',
                     background: 'var(--primary)',
                     color: 'white',
-                    borderRadius: '4px',
+                    borderRadius: '12px',
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
                 }}>
                     <h2 style={{ margin: 0 }}>TOTAL EXPENDITURE</h2>
-                    <h1 style={{ margin: 0 }}>${report.totalCost.toLocaleString()}</h1>
+                    <h1 style={{ margin: 0 }}>${report.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h1>
                 </div>
 
                 <div style={{ marginTop: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>

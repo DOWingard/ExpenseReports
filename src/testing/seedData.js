@@ -1,12 +1,18 @@
-import { addExpense, saveSettings, db } from '../src/db';
+import { addExpense, db } from '../db';
 
-export const seedDatabase = async () => {
-    // Clear existing data for fresh test
-    await db.expenses.clear();
-    await db.reports.clear();
+export const seedDatabase = async (orgId) => {
+    if (!orgId) {
+        console.error('No organization selected for seeding');
+        return;
+    }
+
+    // Clear existing data for this organization to ensure clean test state
+    await db.expenses.where('orgId').equals(orgId).delete();
+    await db.reports.where('orgId').equals(orgId).delete();
 
     const sampleExpenses = [
         {
+            orgId,
             name: 'Software Engineer - Level 3',
             description: 'Monthly payroll for lead dev',
             date: new Date().toISOString().split('T')[0],
@@ -17,6 +23,7 @@ export const seedDatabase = async () => {
             recurringDay: '1'
         },
         {
+            orgId,
             name: 'AWS Infrastructure',
             description: 'Cloud hosting costs',
             date: new Date().toISOString().split('T')[0],
@@ -27,16 +34,18 @@ export const seedDatabase = async () => {
             recurringDay: '15'
         },
         {
+            orgId,
             name: 'Office Rent - Main St',
             description: '',
             date: new Date().toISOString().split('T')[0],
             price: 3200,
-            category: 'Personnel', // Using Personnel category for simplicity in testing groups
+            category: 'Personnel',
             isRecurring: true,
             frequency: 'monthly',
             recurringDay: '1'
         },
         {
+            orgId,
             name: 'New Monitor Set',
             description: 'Equipment for new hire',
             date: new Date().toISOString().split('T')[0],
@@ -45,6 +54,7 @@ export const seedDatabase = async () => {
             isRecurring: false
         },
         {
+            orgId,
             name: 'Business Lunch',
             description: 'Client meeting',
             date: new Date().toISOString().split('T')[0],
@@ -58,5 +68,5 @@ export const seedDatabase = async () => {
         await addExpense(exp);
     }
 
-    console.log('Database seeded with test data');
+    console.log(`Database seeded with test data for org: ${orgId}`);
 };

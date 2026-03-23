@@ -14,13 +14,13 @@ export const calculateNextReportDate = (startDate, frequency, reportDay) => {
     let date = startOfDay(parseISO(startDate));
     const now = startOfDay(new Date());
 
-    // Simple heuristic for frequency - in real app would be more robust
     const advance = (d) => {
         switch (frequency) {
             case 'weekly': return addWeeks(d, 1);
             case 'bi-weekly': return addWeeks(d, 2);
             case 'monthly': return addMonths(d, 1);
-            case 'annually': return addYears(d, 1);
+            case 'annually':
+            case 'annual': return addYears(d, 1);
             default: return addMonths(d, 1);
         }
     };
@@ -32,12 +32,35 @@ export const calculateNextReportDate = (startDate, frequency, reportDay) => {
     return date;
 };
 
-export const generateReport = (expenses, periodName) => {
-    const oneTime = expenses.filter(e => !e.isRecurring);
-    const recurring = expenses.filter(e => e.isRecurring);
+export const FREQUENCY_FACTORS = {
+    'weekly': 52,
+    'bi-weekly': 26,
+    'monthly': 12,
+    'annual': 1,
+    'annually': 1
+};
 
-    const totalOneTime = oneTime.reduce((sum, e) => sum + Number(e.price), 0);
-    const totalRecurring = recurring.reduce((sum, e) => sum + Number(e.price), 0);
+export const generateReport = (expenses, periodName, reportFrequency = 'monthly') => {
+    const reportFactor = FREQUENCY_FACTORS[reportFrequency] || 12;
+
+    const proRatedExpenses = expenses.map(e => {
+        if (!e.isRecurring) return { ...e, reportPrice: Number(e.price) };
+
+        const expenseFactor = FREQUENCY_FACTORS[e.frequency] || 12;
+        const reportPrice = (Number(e.price) * expenseFactor) / reportFactor;
+
+        return {
+            ...e,
+            reportPrice,
+            originalPrice: Number(e.price)
+        };
+    });
+
+    const oneTime = proRatedExpenses.filter(e => !e.isRecurring);
+    const recurring = proRatedExpenses.filter(e => e.isRecurring);
+
+    const totalOneTime = oneTime.reduce((sum, e) => sum + e.reportPrice, 0);
+    const totalRecurring = recurring.reduce((sum, e) => sum + e.reportPrice, 0);
 
     return {
         payPeriod: periodName,
@@ -45,6 +68,7 @@ export const generateReport = (expenses, periodName) => {
         totalRecurring,
         totalCost: totalOneTime + totalRecurring,
         generationDate: new Date().toISOString(),
-        expenses: expenses // Store a snapshot of expenses for that period
+        expenses: proRatedExpenses,
+        reportFrequency
     };
 };
